@@ -56,6 +56,25 @@ class GameTests(unittest.TestCase):
 		"\n"
 		"It's Black's move.\n")
 		self.assertEqual(result, expectedresult)
+	
+	nextMove = 0
+	repititions = 0
+	win_and_repeat_moves = ['0','1','0','1','0','1','0','y']
+	
+	@staticmethod
+	def win_and_repeat(x):
+		result = GameTests.win_and_repeat_moves[GameTests.nextMove]
+		GameTests.nextMove += 1
+		if GameTests.nextMove >= len(GameTests.win_and_repeat_moves):
+			GameTests.repititions += 1
+			GameTests.nextMove = 0
+		if GameTests.repititions >= sys.getrecursionlimit():
+			result = 'q'
+		return result
+		
+	
+	def test_restart(self):
+		self.game = ConnectFour(GameTests.win_and_repeat)
 
 if __name__ == '__main__':
     unittest.main()
