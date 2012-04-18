@@ -25,6 +25,7 @@ class ConnectFourBoard:
 		self._isgameover = False
 		self._winner = None
 		self._nextplayer = ConnectFourBoard.blackpiece
+		self._moves = []
 		
 	def isgameover(self):
 		return self._isgameover
@@ -46,10 +47,19 @@ class ConnectFourBoard:
 				row -= 1
 			
 			self._board[row][column] = self._nextplayer
+			self._moves.append(column)
 			self._checkgameover(row, column)
 			self._turnover()
 		except IndexError:
 			raise ColumnFullException(column)
+	
+	def undo(self):
+		column = self._moves.pop()
+		for row in range(0, ConnectFourBoard._rows):
+			if(self._board[row][column] != ConnectFourBoard.emptyspace):
+				self._board[row][column] = ConnectFourBoard.emptyspace
+				self._turnover()
+				break
 			
 	def _turnover(self):
 		if(self._nextplayer == ConnectFourBoard.blackpiece):
@@ -179,10 +189,10 @@ class ConnectFourBoard:
 
 class ConnectFour:
 	
-	def __init__(self):
+	def __init__(self, input_func=raw_input):
 		self._game = ConnectFourBoard()
+		self._input_func = input_func
 		self.breakloop = False
-		system('clear')
 		print "Welcome to Connect Four"
 		print "There are two colors: black and white. Each player plays one color."
 		print "They take turns choosing a column, a piece of their color is dropped into the chosen column."
@@ -192,7 +202,6 @@ class ConnectFour:
 		
 	def gameloop(self):
 		while(not self.breakloop):
-			system('clear')
 			print self._game
 			if self._game.isgameover():
 				if self._game.winner() == "Tie":
@@ -202,11 +211,11 @@ class ConnectFour:
 				self.reset()
 			else:
 				print "It's "+self._getplayer()+"'s move."
-				self._docommand(raw_input("What column would you like to drop in? [0–6] "))
+				self._docommand(self._input_func("What column would you like to drop in? [0–6] "))
 
 	
 	def reset(self):
-		option = raw_input("Would you like to play again? [Y/N] ")
+		option = self._input_func("Would you like to play again? [Y/N] ")
 		if (option == 'Y') or (option == 'y'):
 			self._game = ConnectFourBoard()
 			self.gameloop()
@@ -224,6 +233,8 @@ class ConnectFour:
 				print "No can do, hombre, that column's full. Try again."
 		elif command == 'q':
 			self.breakloop = True
+		elif command == 'u':
+			self._game.undo()
 		
 	def _getplayer(self):
 		if self._game._nextplayer == ConnectFourBoard.blackpiece:
