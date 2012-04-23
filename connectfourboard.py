@@ -16,6 +16,7 @@ class GameOverException(InvalidMoveException):
 	
 
 class ConnectFourBoard:
+	"""A game board for playing Connect Four"""
 	
 	blackpiece = u'●'
 	whitepiece = u'○'
@@ -24,6 +25,7 @@ class ConnectFourBoard:
 	_rows = 6
 	
 	def __init__(self):
+		"""Create a new empty Connect Four board with black to play next"""
 		self._board = [[ConnectFourBoard.emptyspace for x in range(0,ConnectFourBoard._columns)] for y in range(0,ConnectFourBoard._rows)]
 		self._isgameover = False
 		self._winner = None
@@ -32,13 +34,16 @@ class ConnectFourBoard:
 		self._lastMove = -1
 	
 	def isgameover(self):
+		"""Return true if game is over (board is full or someone won)"""
 		return self._isgameover
 	
 	def winner(self):
+		"""Return the winner if there is one or the empty string otherwise"""
 		return self._winner.encode("iso-8859-1")
 	
 		
 	def play(self, column):
+		"""Play the next piece into the specified column"""
 		if not isinstance(column, int):
 			raise TypeError("Argument is not an int")
 			
@@ -59,6 +64,7 @@ class ConnectFourBoard:
 			raise ColumnFullException(column)
 	
 	def undo(self):
+		"""Undo the last move"""
 		column = self._moves[self._lastMove]
 		for row in range(0, ConnectFourBoard._rows):
 			if(self._board[row][column] != ConnectFourBoard.emptyspace):
@@ -68,6 +74,7 @@ class ConnectFourBoard:
 		self._lastMove -= 1
 	
 	def redo(self):
+		"""Redo the next move"""
 		if self._lastMove < len(self._moves)-1:
 			self.play(self._moves[self._lastMove+1])
 		else:

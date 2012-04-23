@@ -4,20 +4,27 @@ from connectfourboard import ConnectFourBoard
 class ConnectFour:
 	
 	def __init__(self, input_func=raw_input, start=True):
+		"""Create a new game of Connect Four.
+		
+		If start is True (default) then the game starts playing immediately.
+		
+		If input_func is specified input will be pulled from there instead of
+		raw_input."""
 		self._game = ConnectFourBoard()
 		self._input_func = input_func
 		self.breakloop = False
-		print "Welcome to Connect Four"
-		print "There are two colors: black and white. Each player plays one color."
-		print "They take turns choosing a column, a piece of their color is dropped into the chosen column."
-		print "If there are four pieces of the same color in a row (horizontal, vertical, or diagonal) the player of that color wins."
-		print "Black goes first. Good luck!"
 		if start:
 			self.gameloop()
 	
 			
 		
 	def gameloop(self):
+		"""Start the game and continue until the user quits."""
+		print "Welcome to Connect Four"
+		print "There are two colors: black and white. Each player plays one color."
+		print "They take turns choosing a column, a piece of their color is dropped into the chosen column."
+		print "If there are four pieces of the same color in a row (horizontal, vertical, or diagonal) the player of that color wins."
+		print "Black goes first. Good luck!"
 		while(not self.breakloop):
 			print self._game
 			if self._game.isgameover():
@@ -32,6 +39,7 @@ class ConnectFour:
 
 	
 	def reset(self):
+		"""Reset the game to the initial state"""
 		option = self._input_func("Would you like to play again? [Y/N] ")
 		if (option == 'Y') or (option == 'y'):
 			self._game = ConnectFourBoard()
@@ -70,6 +78,6 @@ class ConnectFour:
 
 
 if __name__ == '__main__':
-	g = ConnectFour()
+	game = ConnectFour()
 	
 	
