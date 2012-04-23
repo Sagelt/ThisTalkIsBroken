@@ -2,15 +2,19 @@
 from os import system
 
 class InvalidMoveException(Exception):
-	pass
+	def __init__(self, message=None):
+		Exception.__init__(self, message)
 	
+
 class ColumnFullException(InvalidMoveException):
 	def __init__(self, col):
 		Exception.__init__(self, "Invalid move: column "+str(col)+" is full")
-		
+	
+
 class GameOverException(InvalidMoveException):
 	def __init__(self):
 		Exception.__init__(self, "Invalid move: game is over")
+	
 
 class ConnectFourBoard:
 	
@@ -26,12 +30,14 @@ class ConnectFourBoard:
 		self._winner = None
 		self._nextplayer = ConnectFourBoard.blackpiece
 		self._moves = []
-		
+		self._lastMove = -1
+	
 	def isgameover(self):
 		return self._isgameover
-		
+	
 	def winner(self):
 		return self._winner.encode("iso-8859-1")
+	
 		
 	def play(self, column):
 		if not isinstance(column, int):
@@ -47,25 +53,43 @@ class ConnectFourBoard:
 				row -= 1
 			
 			self._board[row][column] = self._nextplayer
-			self._moves.append(column)
+			self._recordmove(column)
 			self._checkgameover(row, column)
 			self._turnover()
 		except IndexError:
 			raise ColumnFullException(column)
 	
 	def undo(self):
-		column = self._moves.pop()
+		column = self._moves[self._lastMove]
 		for row in range(0, ConnectFourBoard._rows):
 			if(self._board[row][column] != ConnectFourBoard.emptyspace):
 				self._board[row][column] = ConnectFourBoard.emptyspace
 				self._turnover()
 				break
+		self._lastMove -= 1
+	
+	def redo(self):
+		if self._lastMove < len(self._moves)-1:
+			self.play(self._moves[self._lastMove+1])
+		else:
+			raise InvalidMoveException("No move to redo")
+	
+		
+	def _recordmove(self, move):
+		if self._lastMove == len(self._moves)-1:
+			self._moves.append(move)
+			self._lastMove += 1
+		else:
+			self._lastMove += 1
+			self._moves[self._lastMove] = move
+	
 			
 	def _turnover(self):
 		if(self._nextplayer == ConnectFourBoard.blackpiece):
 			self._nextplayer = ConnectFourBoard.whitepiece
 		else:
 			self._nextplayer = ConnectFourBoard.blackpiece
+	
 			
 	def _checkgameover(self, row, column):
 		full = True
@@ -94,6 +118,7 @@ class ConnectFourBoard:
 			self._isgameover = True
 			self._winner = self._nextplayer
 			
+	
 		
 	def _checkrowfour(self, row, column):
 		count = 1
@@ -111,6 +136,7 @@ class ConnectFourBoard:
 			return True
 		else:
 			return False
+	
 			
 	def _checkcolumnfour(self, row, column):
 		count = 1
@@ -128,6 +154,7 @@ class ConnectFourBoard:
 			return True
 		else:
 			return False
+	
 			
 	def _checkupleftdiagfour(self, row, column):
 		count = 1
@@ -151,6 +178,7 @@ class ConnectFourBoard:
 			return True
 		else:
 			return False
+	
 			
 	def _checkuprightdiagfour(self, row, column):
 		count = 1
@@ -174,6 +202,7 @@ class ConnectFourBoard:
 			return True
 		else:
 			return False		
+	
 			
 	def __str__(self):
 		result = "-----------------\n"
@@ -185,11 +214,12 @@ class ConnectFourBoard:
 			result += "|\n"
 		result += "-----------------\n"
 		return result.encode("iso-8859-1")
-			
+	
+		
 
 class ConnectFour:
 	
-	def __init__(self, input_func=raw_input):
+	def __init__(self, input_func=raw_input, start=True):
 		self._game = ConnectFourBoard()
 		self._input_func = input_func
 		self.breakloop = False
@@ -198,7 +228,10 @@ class ConnectFour:
 		print "They take turns choosing a column, a piece of their color is dropped into the chosen column."
 		print "If there are four pieces of the same color in a row (horizontal, vertical, or diagonal) the player of that color wins."
 		print "Black goes first. Good luck!"
-		self.gameloop()
+		if start:
+			self.gameloop()
+	
+			
 		
 	def gameloop(self):
 		while(not self.breakloop):
@@ -231,16 +264,26 @@ class ConnectFour:
 				self._game.play(int(command))
 			except ColumnFullException:
 				print "No can do, hombre, that column's full. Try again."
+			except GameOverException:
+				print "We're not playing anymore, the game is over."
 		elif command == 'q':
 			self.breakloop = True
 		elif command == 'u':
 			self._game.undo()
-		
+		elif command == 'r':
+			try:
+				self._game.redo()
+			except InvalidMoveException:
+				print "You can't redo what you haven't undone (no moves to redo)"
+	
 	def _getplayer(self):
 		if self._game._nextplayer == ConnectFourBoard.blackpiece:
 			return "Black"
 		else:
 			return "White"
+	
+
+
 
 if __name__ == '__main__':
 	g = ConnectFour()
