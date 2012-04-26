@@ -67,6 +67,32 @@ class ConnectFour:
 				self._game.redo()
 			except InvalidMoveException:
 				print "You can't redo what you haven't undone (no moves to redo)"
+		else:
+			try:
+				limit = int(command)
+				i = 0
+				for p in self.eratosthenes():
+					print p
+					i += 1
+					if i >= limit:
+						break
+			except:
+				pass
+	
+	
+	def eratosthenes(self):
+		D = { }
+		q = 2
+		while 1:
+			if q not in D:
+				yield q
+				D[q*q] = [q]
+			else:
+				for p in D[q]:
+					D.setdefault(p+q, []).append(p)
+				del D[q]
+			q += 1
+	
 	
 	def _getplayer(self):
 		if self._game._nextplayer == ConnectFourBoard.blackpiece:
