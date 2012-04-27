@@ -1,2 +1,14 @@
 # Compiled(-ish) files
 *.pyc
+
+# Coverage files
+*,cover
+
+# Project files
+*.tmproj
+
+# Presentation files
+*.key
+
+# Hidden files
+.*
